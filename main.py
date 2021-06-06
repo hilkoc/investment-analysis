@@ -1,6 +1,7 @@
 """ Command line interface for investment_analysis.py"""
 import investment_analysis as ia
 import argparse
+from argparse import RawTextHelpFormatter
 import pandas as pd
 
 
@@ -53,11 +54,20 @@ def mortgage(args):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="Investment Analysis")
-    subparsers = parser.add_subparsers(help='sub-command help')
+    extra_help = """ run: '%(prog)s subcommand --help'   for more help on each subcommand.\n
+    Examples:
+    %(prog)s      irr 5000
+    %(prog)s compound  120 1000   0.05 --initial 2000
+    %(prog)s pension  1000 0.02 250000
+    %(prog)s mortgage 1000 0.02 150000
+    """
+    parser = argparse.ArgumentParser(prog=None, usage="%(prog)s subcommand [parameters]", epilog=extra_help, formatter_class=argparse.RawTextHelpFormatter)
+    show_help  = lambda args: parser.print_help()
+    parser.set_defaults(func=show_help)
+    subparsers = parser.add_subparsers(help="available subcommands:\n")
     irr_parser = subparsers.add_parser("irr", help="Find the internal rate of return of a list of cashflows")
     irr_parser.add_argument("current_value", type=float, help="Total value of the invested amounts today")
-    irr_parser.add_argument("--csv_file", help="Csv file containing columns 'Date' and 'Amount'")
+    irr_parser.add_argument("--csv_file", help="Csv file containing columns 'Date' and 'Amount'. Defaults to sample.csv")
     irr_parser.set_defaults(func=irr)
 
     compound_parser = subparsers.add_parser('compound', help='Compute the compounded return of a regular investment')
